@@ -57,6 +57,11 @@
                 "glob": "**/*",
                 "input": "node_modules/eva-icons",
                 "output": "/eva-icons"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets",
+                "output": "/assets"
               }
             ],
             "styles": [

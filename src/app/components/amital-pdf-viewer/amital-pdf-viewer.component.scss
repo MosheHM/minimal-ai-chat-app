@@ -4,6 +4,14 @@
   overflow: hidden;
   background: var(--theme-primary-container);
   position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.pdf-viewer-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 400px;
 }
 
 /* PDF Viewer Styling */
