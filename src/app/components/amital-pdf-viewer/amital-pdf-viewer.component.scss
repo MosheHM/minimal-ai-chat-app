@@ -1,0 +1,23 @@
+.pdf-viewer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.pdf-viewer-content {
+  flex: 1;
+  overflow: auto;
+}
+
+::ng-deep ngx-extended-pdf-viewer {
+  .pdfViewer {
+    background: #f5f5f5 !important;
+  }
+
+  .page {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 16px !important;
+  }
+}

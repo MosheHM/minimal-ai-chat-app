@@ -1,0 +1,456 @@
+// Wrapper for chat and sidebar layout
+.amital-ai-chat-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: relative;
+
+  &.sidebar-open {
+    .amital-ai-chat-container {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .citation-sidebar {
+      flex: 1;
+      min-width: 300px;
+      max-width: 50%;
+    }
+  }
+}
+
+.amital-ai-chat-container {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  transition: width 0.3s ease;
+
+  nb-chat {
+    height: 100%;
+  }
+}
+
+// Citation Sidebar
+.citation-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--card-background-color, #fff);
+  border-left: 1px solid var(--border-basic-color-3, #e4e9f2);
+  transition: width 0.3s ease;
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 59px;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      overflow: hidden;
+
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      nb-icon {
+        flex-shrink: 0;
+      }
+    }
+
+    button {
+      color: white;
+      flex-shrink: 0;
+    }
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  // Citation buttons list
+  .citation-buttons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+
+    .citation-button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--color-basic-200, #f7f9fc);
+      border: 1px solid var(--border-basic-color-3, #e4e9f2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      width: 100%;
+
+      &:hover {
+        background: var(--color-basic-300, #edf1f7);
+        border-color: var(--color-primary-default, #3366ff);
+        transform: translateX(4px);
+      }
+
+      &:active {
+        transform: translateX(2px);
+      }
+
+      .citation-number {
+        flex-shrink: 0;
+        background: var(--color-primary-default, #3366ff);
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 4px;
+        min-width: 32px;
+        text-align: center;
+      }
+
+      .citation-name {
+        flex: 1;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-basic-color, #222b45);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .citation-arrow {
+        flex-shrink: 0;
+        color: var(--text-hint-color, #8f9bb3);
+        font-size: 16px;
+
+        ::ng-deep svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  .sidebar-loading,
+  .sidebar-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-background-color, #fff);
+    z-index: 1;
+  }
+
+  .sidebar-error {
+    color: var(--color-danger-600, #c53030);
+
+    nb-icon {
+      font-size: 48px;
+
+      ::ng-deep svg {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  }
+
+  .document-info {
+    padding: 8px 16px;
+    background: var(--color-basic-200, #f7f9fc);
+    border-bottom: 1px solid var(--border-basic-color-3, #e4e9f2);
+
+    .page-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-hint-color, #8f9bb3);
+
+      nb-icon {
+        font-size: 14px;
+
+        ::ng-deep svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+  }
+
+  .viewer-container {
+    flex: 1;
+    overflow: hidden;
+
+    amital-pdf-viewer,
+    amital-word-viewer,
+    amital-excel-viewer,
+    amital-image-viewer {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  .unsupported-format {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    height: 100%;
+    color: var(--text-hint-color, #8f9bb3);
+
+    > nb-icon {
+      font-size: 64px;
+
+      ::ng-deep svg {
+        width: 64px;
+        height: 64px;
+      }
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      nb-icon {
+        margin: 0;
+        font-size: 16px;
+
+        ::ng-deep svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Message content with clickable citations
+.message-content {
+  line-height: 1.5;
+  word-wrap: break-word;
+
+  &.rtl-text {
+    direction: rtl;
+    text-align: right;
+  }
+
+  &.ltr-text {
+    direction: ltr;
+    text-align: left;
+  }
+
+  ::ng-deep strong {
+    color: inherit;
+  }
+
+  ::ng-deep .citation-link {
+    color: var(--color-primary-default, #3366ff);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary-hover, #598bff);
+      text-decoration: underline;
+    }
+  }
+}
+
+// Custom header actions
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+
+  span {
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+// Empty state
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--text-hint-color, #a0aec0);
+  text-align: center;
+
+  nb-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+
+    ::ng-deep svg {
+      width: 64px;
+      height: 64px;
+    }
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+// Typing indicator animation
+.typing-dots {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-hint-color, #cbd5e0);
+    animation: typingDot 1.4s infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+// Error message
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-danger-100, #fff5f5);
+  color: var(--color-danger-600, #c53030);
+  border-top: 1px solid var(--color-danger-300, #feb2b2);
+  font-size: 14px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  animation:
+    fadeIn 0.3s ease-in,
+    fadeOut 0.5s ease-out 4.5s forwards;
+
+  nb-icon {
+    font-size: 20px;
+
+    ::ng-deep svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// Animations
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes typingDot {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  30% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+// Override Nebular styles if needed
+::ng-deep {
+  nb-chat {
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    nb-chat-form {
+      .send-button {
+        &:disabled {
+          opacity: 0.5;
+        }
+      }
+    }
+
+    // Ensure text is readable
+    .message-content {
+      color: inherit;
+    }
+  }
+}

@@ -1,0 +1,219 @@
+<div class="amital-ai-chat-wrapper" [class.sidebar-open]="isSidebarOpen">
+  <!-- Main Chat Container -->
+  <div class="amital-ai-chat-container" [ngClass]="config().customClasses?.container">
+    <nb-chat title="AI Assistant" size="medium" [scrollBottom]="true">
+      <!-- Header Actions -->
+      <ng-template nbChatTitle>
+        <div class="chat-header-actions">
+          <span>AI Assistant</span>
+          <div class="header-buttons">
+            @if (availableCitations.length > 0) {
+              <button
+                nbButton
+                ghost
+                size="tiny"
+                (click)="toggleSidebar()"
+                [status]="isSidebarOpen ? 'primary' : 'basic'"
+                title="View Sources"
+              >
+                <nb-icon icon="book-open-outline"></nb-icon>
+                Sources ({{ availableCitations.length }})
+              </button>
+            }
+            <button
+              nbButton
+              ghost
+              size="tiny"
+              (click)="clearConversation()"
+              [disabled]="isLoading"
+              title="Clear conversation"
+            >
+              <nb-icon icon="trash-2-outline"></nb-icon>
+            </button>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Custom Message Template for Formatted Text -->
+      <ng-template nbCustomMessage="formatted-text" let-data let-isReply="isReply">
+        <div
+          class="message-content"
+          [innerHTML]="parseMessageWithCitations(data)"
+          [ngClass]="hasHebrew(data) ? 'rtl-text' : 'ltr-text'"
+        ></div>
+      </ng-template>
+
+      <!-- Messages -->
+      @for (message of messages; track trackByMessageId($index, message)) {
+        <nb-chat-message
+          [type]="'formatted-text'"
+          [customMessageData]="message.content"
+          [reply]="message.role === 'user'"
+          [sender]="message.role === 'user' ? 'You' : 'AI Assistant'"
+          [date]="message.timestamp"
+          [dateFormat]="config().showTimestamps ? 'shortTime' : ''"
+          [ngClass]="getMessageClass(message)"
+        >
+        </nb-chat-message>
+      }
+
+      <!-- Typing indicator -->
+      @if (isLoading && messages.length > 0 && !messages[messages.length - 1].isStreaming) {
+        <nb-chat-message type="text" message="" [reply]="false" sender="AI Assistant" [date]="currentDate">
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </nb-chat-message>
+      }
+
+      <!-- Empty state -->
+      @if (messages.length === 0) {
+        <div class="empty-state">
+          <nb-icon icon="message-circle-outline"></nb-icon>
+          <p>Start a conversation with the AI assistant</p>
+        </div>
+      }
+
+      <!-- Chat Form -->
+      <nb-chat-form
+        (send)="onSendMessage($event)"
+        [showButton]="true"
+        [buttonIcon]="isLoading ? 'loader-outline' : 'paper-plane-outline'"
+        [dropFiles]="false"
+      >
+      </nb-chat-form>
+    </nb-chat>
+
+    <!-- Error Display -->
+    @if (errorMessage) {
+      <div class="error-message">
+        <nb-icon icon="alert-triangle-outline"></nb-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Citation Sidebar -->
+  @if (isSidebarOpen) {
+    <div class="citation-sidebar">
+      <!-- List View -->
+      @if (sidebarView === 'list') {
+        <!-- Sidebar Header - List View -->
+        <div class="sidebar-header">
+          <div class="sidebar-title">
+            <nb-icon icon="list-outline"></nb-icon>
+            <span>Sources ({{ availableCitations.length }})</span>
+          </div>
+          <button nbButton ghost size="tiny" (click)="closeSidebar()" title="Close">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        </div>
+
+        <!-- Citation List -->
+        <div class="sidebar-content">
+          <div class="citation-buttons-list">
+            @for (citation of availableCitations; track citation.id) {
+              <button class="citation-button" (click)="selectCitationFromList(citation)">
+                <span class="citation-number">[{{ citation.citation_id }}]</span>
+                <span class="citation-name">{{ citation.title }}</span>
+                <nb-icon icon="arrow-ios-forward-outline" class="citation-arrow"></nb-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Document View -->
+      @if (sidebarView === 'document') {
+        <!-- Sidebar Header - Document View -->
+        <div class="sidebar-header">
+          <button nbButton ghost size="tiny" (click)="backToList()" title="Back to list">
+            <nb-icon icon="arrow-back-outline"></nb-icon>
+          </button>
+          <div class="sidebar-title">
+            <nb-icon icon="file-text-outline"></nb-icon>
+            <span>{{ selectedCitation?.citation?.title || 'Document' }}</span>
+          </div>
+          <button nbButton ghost size="tiny" (click)="closeSidebar()" title="Close">
+            <nb-icon icon="close-outline"></nb-icon>
+          </button>
+        </div>
+
+        <!-- Sidebar Content -->
+        <div class="sidebar-content">
+          @if (selectedCitation?.isLoading) {
+            <div class="sidebar-loading">
+              <nb-spinner status="primary" size="large"></nb-spinner>
+              <span>Loading document...</span>
+            </div>
+          } @else if (selectedCitation?.error) {
+            <div class="sidebar-error">
+              <nb-icon icon="alert-circle-outline"></nb-icon>
+              <span>{{ selectedCitation!.error }}</span>
+            </div>
+          } @else if (selectedCitation?.blobUrl) {
+            <!-- Document Info -->
+            <div class="document-info">
+              @if (selectedCitation!.citation.citation_location.length) {
+                <div class="page-info">
+                  <nb-icon icon="bookmark-outline"></nb-icon>
+                  <span
+                    >{{ selectedCitation!.citation.citation_location_type }}:
+                    {{ selectedCitation!.citation.citation_location.join(', ') }}</span
+                  >
+                </div>
+              }
+            </div>
+
+            <!-- Document Viewer -->
+            <div class="viewer-container">
+              @if (isPdf()) {
+                <amital-pdf-viewer
+                  [src]="selectedCitation!.blobUrl!"
+                  [startPage]="getViewerStartPage()"
+                  [fileName]="selectedCitation!.citation.title"
+                  [showToolbar]="true"
+                  [allowDownload]="true"
+                  [allowRotation]="true"
+                  [allowZoom]="true"
+                  (loadError)="onViewerError($event)"
+                ></amital-pdf-viewer>
+              } @else if (isWord()) {
+                <amital-word-viewer
+                  [src]="selectedCitation!.blobUrl!"
+                  [fileName]="selectedCitation!.citation.title"
+                  (loadError)="onViewerError($event)"
+                ></amital-word-viewer>
+              } @else if (isExcel()) {
+                <amital-excel-viewer
+                  [src]="selectedCitation!.blobUrl!"
+                  [fileName]="selectedCitation!.citation.title"
+                  (loadError)="onViewerError($event)"
+                ></amital-excel-viewer>
+              } @else if (isImage()) {
+                <amital-image-viewer
+                  [src]="selectedCitation!.blobUrl!"
+                  [fileName]="selectedCitation!.citation.title"
+                  (loadError)="onViewerError($event)"
+                ></amital-image-viewer>
+              } @else {
+                <div class="unsupported-format">
+                  <nb-icon icon="file-outline"></nb-icon>
+                  <span>Unsupported file format: {{ getFileType() }}</span>
+                  <a [href]="selectedCitation!.blobUrl!" target="_blank" download>
+                    <button nbButton status="primary" size="small" class="download-btn">
+                      <nb-icon icon="download-outline"></nb-icon>
+                      <span>Download File</span>
+                    </button>
+                  </a>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

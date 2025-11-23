@@ -1,0 +1,24 @@
+<div class="image-viewer-container">
+  @if (isLoading) {
+    <div class="loading">
+      <span>Loading image...</span>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <span>{{ error }}</span>
+    </div>
+  }
+
+  @if (imageSrc && !error) {
+    <div class="image-container">
+      <img
+        [src]="imageSrc"
+        [alt]="fileName()"
+        (load)="onImageLoad()"
+        (error)="onImageError()"
+      />
+    </div>
+  }
+</div>

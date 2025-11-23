@@ -1,0 +1,17 @@
+// Nebular theme
+@import '@nebular/theme/styles/globals';
+@import '@nebular/theme/styles/prebuilt/default';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

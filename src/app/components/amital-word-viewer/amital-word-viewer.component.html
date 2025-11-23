@@ -1,0 +1,15 @@
+<div class="word-viewer-container">
+  @if (isLoading) {
+    <div class="loading">
+      <span>Loading document...</span>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <span>{{ error }}</span>
+    </div>
+  }
+
+  <div #docxContainer class="docx-container"></div>
+</div>

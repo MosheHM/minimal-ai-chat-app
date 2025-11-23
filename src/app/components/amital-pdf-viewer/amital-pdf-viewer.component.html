@@ -1,0 +1,15 @@
+<div class="pdf-viewer-container">
+  <div class="pdf-viewer-content">
+    <ngx-extended-pdf-viewer
+      [src]="pdfSrc"
+      [zoom]="currentZoom"
+      [page]="currentPage"
+      [rotation]="currentRotation"
+      (pdfLoaded)="onPdfLoaded($event)"
+      (pdfLoadingFailed)="onPdfLoadingFailed($event)"
+      (pageChange)="onPageChange($event)"
+      (currentZoomFactor)="onZoomChange($event)"
+    >
+    </ngx-extended-pdf-viewer>
+  </div>
+</div>

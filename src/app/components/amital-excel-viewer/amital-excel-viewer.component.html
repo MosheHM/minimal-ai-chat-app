@@ -1,0 +1,41 @@
+<div class="excel-viewer-container">
+  @if (isLoading) {
+    <div class="loading">
+      <span>Loading spreadsheet...</span>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <span>{{ error }}</span>
+    </div>
+  }
+
+  @if (!isLoading && !error && sheetNames.length > 0) {
+    @if (sheetNames.length > 1) {
+      <div class="sheet-tabs">
+        @for (name of sheetNames; track $index) {
+          <button
+            class="sheet-tab"
+            [class.active]="currentSheet === $index"
+            (click)="selectSheet($index)"
+          >
+            {{ name }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="table-container">
+      <table>
+        @for (row of tableData; track $index) {
+          <tr>
+            @for (cell of row; track $index) {
+              <td>{{ cell }}</td>
+            }
+          </tr>
+        }
+      </table>
+    </div>
+  }
+</div>
