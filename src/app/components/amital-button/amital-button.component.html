@@ -1,0 +1,21 @@
+@switch (type()) {
+  @case ('fill') {
+    <button mat-flat-button #button [disableRipple]="true">
+      <ng-container [ngTemplateOutlet]="content"></ng-container>
+    </button>
+  }
+  @case ('stroked') {
+    <button mat-stroked-button #button [disableRipple]="true">
+      <ng-container [ngTemplateOutlet]="content"></ng-container>
+    </button>
+  }
+  @case ('ghost') {
+    <button mat-button #button class="ghost-button" [disableRipple]="true">
+      <ng-container [ngTemplateOutlet]="content"></ng-container>
+    </button>
+  }
+}
+
+<ng-template #content>
+  <ng-content></ng-content>
+</ng-template>

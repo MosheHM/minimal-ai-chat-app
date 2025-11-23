@@ -2,7 +2,7 @@ import { Component, input, output, OnInit, OnDestroy, ChangeDetectorRef } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AmitalDocViewerToolbarComponent } from '../amital-doc-viewer-toolbar/amital-doc-viewer-toolbar.component';
-import { AmitalSelectComponent } from '../amital-select/amital-select.component';
+// import { AmitalSelectComponent } from '../amital-select/amital-select.component';
 import * as XLSX from 'xlsx';
 
 export interface ExcelSheetData {
@@ -20,7 +20,7 @@ export interface ExcelData {
 
 @Component({
   selector: 'amital-excel-viewer',
-  imports: [CommonModule, FormsModule, AmitalDocViewerToolbarComponent, AmitalSelectComponent],
+  imports: [CommonModule, FormsModule, AmitalDocViewerToolbarComponent],
   templateUrl: './amital-excel-viewer.component.html',
   styleUrl: './amital-excel-viewer.component.scss',
 })

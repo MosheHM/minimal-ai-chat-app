@@ -1,15 +1,14 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {
-  AmitalIconExportComponent,
-  AmitalIconRotateComponent,
-  AmitalIconZoomInComponent,
-  AmitalIconZoomOutComponent,
-} from '../../assets/icons/system';
 import { AmitalButtonComponent } from '../amital-button/amital-button.component';
-import { AmitalIconArrowLeftComponent } from '../../assets/icons/system/amital-icon-arrow-left.component';
-import { AmitalIconArrowRightComponent } from '../../assets/icons/system/amital-icon-arrow-right.component';
+import { AmitalIconArrowLeftComponent } from '../../../assets/icons/amital-icon-arrow-left.component';
+import { AmitalIconArrowRightComponent } from '../../../assets/icons/amital-icon-arrow-right.component';
+import { AmitalIconExportComponent } from '../../../assets/icons/amital-icon-export.component';
+import { AmitalIconRotateComponent } from '../../../assets/icons/amital-icon-rotate.component';
+import { AmitalIconZoomInComponent } from '../../../assets/icons/amital-icon-zoom-in.component';
+import { AmitalIconZoomOutComponent } from '../../../assets/icons/amital-icon-zoom-out.component';
+
 
 @Component({
   selector: 'amital-doc-viewer-toolbar',

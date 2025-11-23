@@ -1,0 +1,58 @@
+@use 'sass:map';
+@use '../../theme/theme-colors' as theme;
+
+:host {
+  display: flex;
+
+  svg {
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  &.stroke svg path {
+    stroke: var(--icon-color-line);
+  }
+
+  &.fill svg path {
+    fill: var(--icon-color-fill);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+
+    &.stroke svg path {
+      stroke: map.get(theme.$disabled, color-1);
+    }
+
+    &.fill svg path {
+      fill: map.get(theme.$disabled, color-1);
+    }
+  }
+}
+
+:host.icon-button {
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: background-color 200ms ease-in-out;
+  cursor: pointer;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px #1976d2;
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:hover {
+    background-color: map.get(theme.$netural, grey-line-1);
+  }
+
+  &:active {
+    background-color: map.get(theme.$netural, grey-line-2);
+  }
+}

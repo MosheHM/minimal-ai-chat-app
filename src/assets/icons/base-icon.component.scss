@@ -1,0 +1,23 @@
+.icon-button {
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: transparent;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+  &:hover:not(.disabled) {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.04);
+  }
+  &:active:not(.disabled) {
+    background: rgba(0, 0, 0, 0.08);
+  }
+  &:focus-visible {
+    box-shadow: 0 0 0 2px #1976d2;
+  }
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}

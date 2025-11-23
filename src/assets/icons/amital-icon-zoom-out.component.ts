@@ -1,0 +1,20 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BaseIconComponent } from './base-icon.component';
+
+@Component({
+  selector: 'amital-icon-zoom-out',
+  standalone: true,
+  template: `<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M21.1323 20.9584L16.637 16.4632C18.3943 14.9526 19.512 12.7172 19.512 10.2229C19.512 5.68814 15.8239 2 11.2891 2C6.7543 2 3.06616 5.68814 3.06616 10.2229C3.06616 14.7577 6.7543 18.4459 11.2891 18.4459C12.888 18.4459 14.3803 17.986 15.6442 17.1942L20.2704 21.8203C20.3891 21.9391 20.5445 22 20.6998 22C20.8551 22 21.0104 21.9391 21.1292 21.8203C21.3698 21.5797 21.3698 21.196 21.1323 20.9584ZM4.28437 10.2229C4.28437 6.3612 7.42736 3.21821 11.2891 3.21821C15.1508 3.21821 18.2938 6.3612 18.2938 10.2229C18.2938 14.0847 15.1508 17.2277 11.2891 17.2277C7.42736 17.2277 4.28437 14.0847 4.28437 10.2229Z"
+      fill="#1C1C1C"
+    />
+    <path
+      d="M14.7936 9.61292H7.78358C7.44358 9.61292 7.17358 9.88292 7.17358 10.2229C7.17358 10.5629 7.44358 10.8329 7.78358 10.8329H14.7936C15.1336 10.8329 15.4036 10.5629 15.4036 10.2229C15.4036 9.88292 15.1336 9.61292 14.7936 9.61292Z"
+      fill="#1C1C1C"
+    />
+  </svg>`,
+  styleUrls: ['./icon.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AmitalIconZoomOutComponent extends BaseIconComponent {}

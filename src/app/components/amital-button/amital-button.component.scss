@@ -1,0 +1,78 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use '../../../theme/theme-colors' as theme;
+
+button {
+  width: 100% !important;
+  height: var(--height) !important;
+  border-radius: var(--border-radius, 500px);
+  font-weight: 400;
+  letter-spacing: 0px;
+}
+
+:host ::ng-deep {
+  [mat-flat-button] span {
+    color: map.get(theme.$netural, white) !important;
+  }
+
+  button span {
+    text-wrap: nowrap;
+  }
+}
+
+:host {
+  width: var(--width);
+  height: var(--height);
+  display: inline-flex;
+
+  &.disabled {
+    pointer-events: none;
+  }
+
+  &.border button {
+    border: var(--border);
+  }
+
+  &.primary {
+    [mat-flat-button] {
+      @include mat.button-overrides(
+        (
+          filled-container-color: map.get(theme.$primary, blue),
+          outlined-label-text-color: map.get(theme.$netural, white),
+          filled-disabled-container-color: map.get(theme.$netural, grey-line-2),
+          filled-disabled-label-text-color: map.get(theme.$disabled, color-1),
+        )
+      );
+
+      &:hover {
+        @include mat.button-overrides(
+          (
+            filled-container-color: map.get(theme.$primary, blue-01),
+          )
+        );
+      }
+    }
+
+    [mat-stroked-button] {
+      @include mat.button-overrides(
+        (
+          outlined-outline-color: map.get(theme.$primary, blue),
+          outlined-label-text-color: map.get(theme.$netural, black),
+          outlined-disabled-label-text-color: map.get(theme.$disabled, color-1),
+          outlined-disabled-outline-color: map.get(theme.$netural, color-1),
+        )
+      );
+
+      &:hover {
+        background: map.get(theme.$netural, white);
+
+        @include mat.button-overrides(
+          (
+            outlined-outline-color: map.get(theme.$primary, blue-01),
+            outlined-label-text-color: map.get(theme.$primary, blue-01),
+          )
+        );
+      }
+    }
+  }
+}
