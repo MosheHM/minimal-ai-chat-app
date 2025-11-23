@@ -1,0 +1,98 @@
+<div class="form-wrapper">
+  <mat-form-field [appearance]="'outline'" [ngClass]="{ 'amital-select-panel-opened': panelOpen }">
+    <amital-label
+      [isInput]="true"
+      [color]="disabled() ? theme.disabled['color-1'] : labelColor()"
+      [textCode]="labelTextCode()"
+      [labelRef]="labelRef()"
+    >
+      @if (!labelTextCode() && !labelRef()) {
+        {{ label() }}
+      }
+      <ng-content></ng-content>
+    </amital-label>
+
+    @if (panelOpen) {
+      <amital-icon-arrow-up matSuffix [size]="15"></amital-icon-arrow-up>
+    } @else if (!readonly()) {
+      <amital-icon-arrow-down
+        matSuffix
+        [size]="15"
+        [colorFill]="disabled() ? theme.disabled['color-1'] : theme.neutral.black"
+      ></amital-icon-arrow-down>
+    }
+
+    <amital-tooltip [message]="tooltip()" [position]="tooltipPosition()">
+      <mat-select
+        #select
+        matInput
+        [formControl]="formControl"
+        (blur)="updateErrorMessage(); onTouched()"
+        [(value)]="value"
+        [ariaLabel]="label()"
+        [placeholder]="placeholder()"
+        [required]="required() ?? false"
+        [panelClass]="'amital-select-panel'"
+        [multiple]="multiple()"
+        [panelWidth]="dropdownWidth() || panelWidth()"
+        (openedChange)="panelOpen = $event"
+        id="{{ 'select_' + id() }}"
+        aria-describedby="{{ ariaDescribedBy() }}"
+        class="custom-select"
+      >
+        @for (item of options(); track item) {
+          <mat-option
+            [value]="valueField() ? item[valueField() || ''] : item"
+            [ngClass]="{ 'amital-mat-option-selected': option.value === select.value }"
+            #option
+          >
+            @if (displayColumns().length > 0) {
+              @for (column of displayColumns(); track column; let last = $last) {
+                <span class="amital-mat-option-column">{{ item[column] }}</span>
+                @if (!last) {
+                  <span class="amital-mat-option-separator"> | </span>
+                }
+              }
+            } @else if (displayField()) {
+              {{ item[displayField() || ''] }}
+            } @else {
+              {{ item }}
+            }
+          </mat-option>
+        }
+
+        @for (opt of optionsRef; track opt) {
+          <mat-option [value]="opt.value()">
+            <ng-container *ngTemplateOutlet="opt.template"></ng-container>
+          </mat-option>
+        }
+
+        @if (loading) {
+          <mat-option disabled> ... </mat-option>
+        }
+
+        @if (showAddNewButton() && onAddNew) {
+          <mat-option (click)="onAddNew.emit()">
+            <span class="amital-select-add-new-option">Add New <amital-icon-plus [size]="15"></amital-icon-plus> </span>
+          </mat-option>
+        }
+      </mat-select>
+    </amital-tooltip>
+
+    @if (formControl.invalid) {
+      <mat-error
+        ><amital-icon-error [size]="14" [colorFill]="theme.status.red"></amital-icon-error>
+        {{ errorMessage() }}</mat-error
+      >
+    }
+  </mat-form-field>
+  @if (hasHelp() && resolvedHelpContent) {
+    <amital-helper
+      [title]="resolvedHelpTitle"
+      [content]="resolvedHelpContent"
+      [useMarkdown]="useMarkdown()"
+      [autoCloseDelay]="autoCloseDelay()"
+      [placement]="'right'"
+    ></amital-helper>
+  }
+</div>

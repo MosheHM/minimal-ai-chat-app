@@ -36,7 +36,7 @@ import { AmitalImageViewerComponent } from '../amital-image-viewer/amital-image-
     AmitalPdfViewerComponent,
     AmitalWordViewerComponent,
     AmitalExcelViewerComponent,
-    AmitalImageViewerComponent,
+    AmitalImageViewerComponent
   ],
   templateUrl: './amital-ai-chat.component.html',
   styleUrls: ['./amital-ai-chat.component.scss'],
@@ -83,7 +83,7 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
   constructor(
     private chatService: AiChatService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Initialize the chat service with API config

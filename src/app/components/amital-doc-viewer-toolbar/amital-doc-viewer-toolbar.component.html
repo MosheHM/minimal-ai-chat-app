@@ -1,0 +1,70 @@
+<div class="custom-toolbar">
+  @if (showZoom) {
+    <div class="zoom-controls">
+      <amital-button type="ghost" (click)="onZoomOut()" [disabled]="!canZoomOut()" title="Zoom Out">
+        <amital-icon-zoom-out [disabled]="!canZoomOut()"></amital-icon-zoom-out>
+      </amital-button>
+
+      <amital-button type="ghost" (click)="onZoomIn()" [disabled]="!canZoomIn()" title="Zoom In">
+        <amital-icon-zoom-in [disabled]="!canZoomIn()"></amital-icon-zoom-in>
+      </amital-button>
+    </div>
+  }
+
+  @if (showRotation) {
+    <amital-button type="ghost" [color]="'accent'" (click)="onRotateClockwise()" title="Rotate Clockwise">
+      <amital-icon-rotate></amital-icon-rotate>
+    </amital-button>
+  }
+
+  <amital-button type="ghost" (click)="onDownload()" title="Download">
+    <amital-icon-export></amital-icon-export>
+  </amital-button>
+
+  @if (showSheetNavigation && totalSheets > 1) {
+    <div class="sheet-navigation">
+      <amital-button type="ghost" (click)="onPreviousSheet()" [disabled]="!canGoPreviousSheet()" title="Previous Sheet">
+        <amital-icon-arrow-left [disabled]="!canGoPreviousSheet()" [size]="iconSize"></amital-icon-arrow-left>
+      </amital-button>
+
+      <select
+        [ngModel]="currentSheet"
+        (ngModelChange)="onSheetChange($event)"
+        class="sheet-selector"
+        title="Select Sheet"
+      >
+        @for (sheetName of sheetNames; track $index) {
+          <option [value]="$index">{{ sheetName }}</option>
+        }
+      </select>
+
+      <amital-button type="ghost" (click)="onNextSheet()" [disabled]="!canGoNextSheet()" title="Next Sheet">
+        <amital-icon-arrow-right [disabled]="!canGoNextSheet()" [size]="iconSize"></amital-icon-arrow-right>
+      </amital-button>
+    </div>
+  }
+
+  @if (showPagination) {
+    <div class="toolbar-pagination">
+      <amital-button type="ghost" (click)="onPreviousPage()" [disabled]="!canGoPrevious()" title="Previous Page">
+        <amital-icon-arrow-left [disabled]="!canGoPrevious()" [size]="iconSize"></amital-icon-arrow-left>
+      </amital-button>
+
+      <input
+        type="number"
+        [(ngModel)]="currentPage"
+        (change)="onPageChange(currentPage)"
+        min="1"
+        [max]="totalPages"
+        class="page-input"
+        title="Current Page"
+      />
+      <span class="page-separator">of</span>
+      <span class="total-pages">{{ totalPages }}</span>
+
+      <amital-button type="ghost" (click)="onNextPage()" [disabled]="!canGoNext()" title="Next Page">
+        <amital-icon-arrow-right [disabled]="!canGoNext()" [size]="iconSize"></amital-icon-arrow-right>
+      </amital-button>
+    </div>
+  }
+</div>

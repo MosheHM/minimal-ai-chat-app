@@ -1,4 +1,20 @@
 <div class="pdf-viewer-container">
+  @if (showToolbar() && src()) {
+    <amital-doc-viewer-toolbar
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [currentZoom]="currentZoom"
+      (previousPage)="previousPage()"
+      (nextPage)="nextPage()"
+      (pageChange)="goToPage($event)"
+      (zoomIn)="zoomIn()"
+      (zoomOut)="zoomOut()"
+      (rotateClockwise)="rotateClockwise()"
+      (download)="downloadPdf()"
+    >
+    </amital-doc-viewer-toolbar>
+  }
+
   <div class="pdf-viewer-content">
     <ngx-extended-pdf-viewer
       [src]="pdfSrc"

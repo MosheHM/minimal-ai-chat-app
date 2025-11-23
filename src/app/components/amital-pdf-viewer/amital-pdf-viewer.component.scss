@@ -1,23 +1,79 @@
 .pdf-viewer-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--theme-primary-container);
+  position: relative;
 }
 
-.pdf-viewer-content {
-  flex: 1;
-  overflow: auto;
-}
-
+/* PDF Viewer Styling */
 ::ng-deep ngx-extended-pdf-viewer {
+  .toolbar {
+    display: none !important;
+  }
+
   .pdfViewer {
-    background: #f5f5f5 !important;
+    background: var(--theme-primary-container) !important;
   }
 
   .page {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px var(--theme-hover-shadow) !important;
     margin-bottom: 16px !important;
+  }
+}
+
+/* Error Message Styling */
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: var(--theme-surface);
+  border-radius: 0 0 8px 8px;
+
+  .error-content {
+    text-align: center;
+    color: var(--theme-on-surface);
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pdf-viewer-container {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Dark Theme Support */
+.dark-theme {
+  .pdf-viewer-container {
+    background: var(--theme-surface);
+    border-color: var(--theme-outline);
+  }
+
+  .error-message {
+    background: var(--theme-surface);
+
+    .error-content {
+      color: var(--theme-on-surface);
+    }
+  }
+
+  ::ng-deep ngx-extended-pdf-viewer {
+    .pdfViewer {
+      background-color: var(--theme-surface) !important;
+    }
   }
 }

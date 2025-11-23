@@ -1,34 +1,412 @@
 .word-viewer-container {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  background: var(--theme-primary-container);
+  position: relative;
+  width: 100%;
   height: 100%;
-  overflow: auto;
-  background: #f5f5f5;
 }
 
-.loading,
-.error {
+.word-viewer-content {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--theme-primary-container);
+  overflow: auto;
+  position: relative;
   padding: 24px;
-  text-align: center;
+
+  .document-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 100%;
+    height: 600px;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 20px;
+
+    /* Custom scrollbar styling */
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--theme-surface-variant);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--theme-outline-variant);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--theme-outline);
+      }
+    }
+
+    /* Firefox scrollbar styling */
+    scrollbar-color: var(--theme-outline-variant) var(--theme-surface-variant);
+
+    &.hidden {
+      display: none;
+    }
+
+    .docx-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: var(--theme-primary-container);
+      box-shadow: 0 2px 8px var(--theme-hover-shadow);
+      border: 1px solid var(--theme-outline-variant);
+      border-radius: 8px;
+      padding: 16px;
+      transition: transform 0.3s ease;
+      transform-origin: center top;
+      max-width: none;
+      width: auto;
+      max-height: none;
+      overflow: visible;
+
+      ::ng-deep {
+        .docx {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.4;
+          color: var(--theme-on-surface);
+
+          // Table styling
+          table {
+            border-collapse: collapse;
+            margin: 12px 0;
+
+            td,
+            th {
+              border: 1px solid #ddd;
+              padding: 8px;
+            }
+
+            th {
+              background-color: #f5f5f5;
+              font-weight: 600;
+            }
+          }
+
+          // Paragraph styling
+          p {
+            margin: 6px 0;
+          }
+
+          // Heading styling
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6 {
+            margin: 12px 0 6px 0;
+            font-weight: 600;
+          }
+
+          // List styling
+          ul,
+          ol {
+            margin: 6px 0;
+            padding-left: 24px;
+          }
+
+          // Image styling
+          img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 12px 0;
+          }
+
+          // Page break styling
+          .docx-page-break {
+            page-break-before: always;
+            border-top: 1px dashed #ccc;
+            margin: 24px 0;
+            padding-top: 24px;
+          }
+        }
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--theme-on-surface);
+    min-height: 200px;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--theme-outline-variant);
+      border-top: 3px solid var(--theme-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    p {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background: var(--theme-surface);
+    border-radius: 8px;
+    margin: 16px;
+    padding: 24px;
+    text-align: center;
+
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .error-message {
+      margin: 0 0 16px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--theme-error);
+    }
+
+    .retry-button {
+      background: var(--theme-primary);
+      color: var(--theme-on-primary);
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: var(--theme-primary-hover, var(--theme-primary));
+      }
+
+      &:focus {
+        outline: 2px solid var(--theme-primary);
+        outline-offset: 2px;
+      }
+    }
+  }
 }
 
-.error {
-  color: #c53030;
+/* Loading animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.docx-container {
-  flex: 1;
-  padding: 16px;
-  background: white;
-  margin: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Responsive Design */
+@media (max-width: 768px) {
+  .word-viewer-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .word-viewer-content {
+    padding: 8px;
+
+    .document-wrapper {
+      // Height will be set dynamically by the component
+      padding: 10px;
+
+      .docx-container {
+        padding: 16px;
+        margin: 0;
+
+        ::ng-deep .docx {
+          font-size: 14px;
+
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6 {
+            margin: 8px 0 4px 0;
+          }
+
+          table {
+            font-size: 12px;
+
+            td,
+            th {
+              padding: 4px;
+            }
+          }
+        }
+      }
+    }
+
+    .error-container {
+      margin: 8px;
+      padding: 16px;
+
+      .error-icon {
+        font-size: 36px;
+        margin-bottom: 12px;
+      }
+
+      .error-message {
+        font-size: 16px;
+      }
+    }
+  }
 }
 
-::ng-deep .docx-wrapper {
-  background: white;
-  padding: 20px;
+/* Print styles */
+@media print {
+  .word-viewer-container {
+    .word-viewer-content {
+      .document-wrapper {
+        .docx-container {
+          box-shadow: none;
+          padding: 0;
+
+          ::ng-deep .docx {
+            .docx-page-break {
+              border: none;
+              margin: 0;
+              padding: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Dark Theme Support */
+.dark-theme {
+  .word-viewer-container {
+    background: var(--theme-surface);
+    border-color: var(--theme-outline);
+  }
+
+  .word-viewer-content {
+    background: var(--theme-surface);
+
+    .document-wrapper {
+      .docx-container {
+        background: var(--theme-surface-variant);
+        color: var(--theme-on-surface);
+
+        ::ng-deep .docx {
+          color: var(--theme-on-surface);
+
+          table {
+            td,
+            th {
+              border-color: var(--theme-outline-variant);
+            }
+
+            th {
+              background-color: var(--theme-surface-container);
+            }
+          }
+
+          .docx-page-break {
+            border-color: var(--theme-outline-variant);
+          }
+        }
+      }
+    }
+
+    .loading-container {
+      color: var(--theme-on-surface);
+
+      .loading-spinner {
+        border-color: var(--theme-outline-variant);
+        border-top-color: var(--theme-primary);
+      }
+    }
+
+    .error-container {
+      background: var(--theme-surface-variant);
+
+      .error-message {
+        color: var(--theme-error);
+      }
+
+      .retry-button {
+        background: var(--theme-primary);
+        color: var(--theme-on-primary);
+      }
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .word-viewer-content {
+    .document-wrapper {
+      .docx-container {
+        border: 2px solid var(--theme-outline);
+        border-radius: 8px;
+      }
+    }
+
+    .error-container {
+      border: 2px solid var(--theme-error);
+    }
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .word-viewer-content {
+    .document-wrapper {
+      .docx-container {
+        transition: none;
+      }
+    }
+  }
+
+  .loading-container .loading-spinner {
+    animation: none;
+    border-top-color: transparent;
+  }
+}
+
+/* RTL support */
+[dir='rtl'] {
+  .word-viewer-content {
+    .document-wrapper {
+      .docx-container {
+        ::ng-deep .docx {
+          direction: rtl;
+          text-align: right;
+
+          ul,
+          ol {
+            padding-right: 24px;
+            padding-left: 0;
+          }
+        }
+      }
+    }
+  }
 }

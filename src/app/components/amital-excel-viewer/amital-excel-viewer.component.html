@@ -1,41 +1,88 @@
 <div class="excel-viewer-container">
+  @if (showToolbar() && currentSheetData) {
+    <amital-doc-viewer-toolbar
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [showPagination]="!!(showPagination() && totalPages > 1)"
+      [showRotation]="false"
+      [showZoom]="false"
+      (previousPage)="previousPage()"
+      (nextPage)="nextPage()"
+      (pageChange)="goToPage($event)"
+      (download)="downloadFile()"
+    >
+    </amital-doc-viewer-toolbar>
+  }
+
   @if (isLoading) {
-    <div class="loading">
-      <span>Loading spreadsheet...</span>
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Excel file...</div>
     </div>
   }
 
-  @if (error) {
-    <div class="error">
-      <span>{{ error }}</span>
+  @if (hasError) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <div class="error-content">
+        <h3>Error Loading File</h3>
+        <p>{{ errorMessage }}</p>
+        <button class="retry-button" (click)="reload()">Retry</button>
+      </div>
     </div>
   }
 
-  @if (!isLoading && !error && sheetNames.length > 0) {
-    @if (sheetNames.length > 1) {
-      <div class="sheet-tabs">
-        @for (name of sheetNames; track $index) {
-          <button
-            class="sheet-tab"
-            [class.active]="currentSheet === $index"
-            (click)="selectSheet($index)"
-          >
-            {{ name }}
-          </button>
+  @if (currentSheetData && !isLoading && !hasError) {
+    <div class="excel-content">
+      <div class="content-header">
+        <div class="sheet-info">
+          <h3>{{ currentSheetData.sheetName }}</h3>
+          <span class="row-info">{{ getDisplayRange() }} rows</span>
+        </div>
+
+        @if (totalSheets > 1) {
+          <div class="sheet-selector">
+            <amital-select
+              [label]="'Sheet'"
+              [options]="sheetOptions"
+              [(value)]="selectedSheetIndex"
+              [displayField]="'name'"
+              [valueField]="'index'"
+              [width]="'200px'"
+            ></amital-select>
+          </div>
         }
       </div>
-    }
 
-    <div class="table-container">
-      <table>
-        @for (row of tableData; track $index) {
-          <tr>
-            @for (cell of row; track $index) {
-              <td>{{ cell }}</td>
+      <div class="table-container" [class.zoomed]="false">
+        <table class="excel-table">
+          <thead>
+            <tr>
+              <th class="row-number-header">#</th>
+              @for (header of currentSheetData.headers; track trackByIndex($index)) {
+                <th class="table-header">
+                  {{ header || 'Column ' + ($index + 1) }}
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of displayData; track trackByIndex($index); let rowIndex = $index) {
+              <tr class="table-row" [class.even-row]="rowIndex % 2 === 0">
+                <td class="row-number">{{ startRow + rowIndex }}</td>
+                @for (cell of row; track trackByIndex($index)) {
+                  <td class="table-cell" [title]="getCellValue(cell)">
+                    {{ getCellValue(cell) }}
+                  </td>
+                }
+                @for (i of getEmptyColumns(row); track trackByIndex($index)) {
+                  <td class="table-cell empty-cell"></td>
+                }
+              </tr>
             }
-          </tr>
-        }
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>

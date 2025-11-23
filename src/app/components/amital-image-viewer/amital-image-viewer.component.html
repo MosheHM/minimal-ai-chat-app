@@ -1,24 +1,43 @@
 <div class="image-viewer-container">
-  @if (isLoading) {
-    <div class="loading">
-      <span>Loading image...</span>
-    </div>
+  @if (showToolbar() && src()) {
+    <amital-doc-viewer-toolbar
+      [currentZoom]="currentZoom"
+      [showPagination]="false"
+      (zoomIn)="zoomIn()"
+      (zoomOut)="zoomOut()"
+      (rotateClockwise)="rotateClockwise()"
+      (download)="downloadPdf()"
+    >
+    </amital-doc-viewer-toolbar>
   }
 
-  @if (error) {
-    <div class="error">
-      <span>{{ error }}</span>
-    </div>
-  }
+  <div class="image-viewer-content" #imageContainer>
+    @if (isLoading) {
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <span>Loading image...</span>
+      </div>
+    }
 
-  @if (imageSrc && !error) {
-    <div class="image-container">
+    @if (hasError && !isLoading) {
+      <div class="error-message">
+        <div class="error-content">
+          <h3>Failed to load image</h3>
+          <p>The image could not be displayed. Please check the image source and try again.</p>
+        </div>
+      </div>
+    }
+
+    @if (!hasError && imageSrc) {
       <img
+        #imageElement
         [src]="imageSrc"
-        [alt]="fileName()"
+        [alt]="alt()"
+        class="image-display"
+        [class.hidden]="isLoading"
         (load)="onImageLoad()"
-        (error)="onImageError()"
+        (error)="onImageError($event)"
       />
-    </div>
-  }
+    }
+  </div>
 </div>
