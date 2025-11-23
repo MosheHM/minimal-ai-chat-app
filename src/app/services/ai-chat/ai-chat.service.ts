@@ -12,7 +12,7 @@ export class AiChatService {
   constructor(private http: HttpClient) {}
 
   setBaseUrl(url: string): void {
-    this.baseUrl = (url.endsWith('/') ? url.slice(0, -1) : url) + '/api';
+    this.baseUrl = (url.endsWith('/') ? url.slice(0, -1) : url) + 'aichattest/api';
   }
 
   chat(request: ChatRequest): Observable<ChatResponse> {
