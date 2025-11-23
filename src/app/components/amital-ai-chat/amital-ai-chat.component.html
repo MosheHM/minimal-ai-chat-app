@@ -1,8 +1,6 @@
 <div class="amital-ai-chat-wrapper" [class.sidebar-open]="isSidebarOpen">
-  <!-- Main Chat Container -->
   <div class="amital-ai-chat-container" [ngClass]="config().customClasses?.container">
     <nb-chat title="AI Assistant" size="medium" [scrollBottom]="true">
-      <!-- Header Actions -->
       <ng-template nbChatTitle>
         <div class="chat-header-actions">
           <span>AI Assistant</span>
@@ -34,7 +32,6 @@
         </div>
       </ng-template>
 
-      <!-- Custom Message Template for Formatted Text -->
       <ng-template nbCustomMessage="formatted-text" let-data let-isReply="isReply">
         <div
           class="message-content"
@@ -43,7 +40,6 @@
         ></div>
       </ng-template>
 
-      <!-- Messages -->
       @for (message of messages; track trackByMessageId($index, message)) {
         <nb-chat-message
           [type]="'formatted-text'"
@@ -86,7 +82,6 @@
       </nb-chat-form>
     </nb-chat>
 
-    <!-- Error Display -->
     @if (errorMessage) {
       <div class="error-message">
         <nb-icon icon="alert-triangle-outline"></nb-icon>
@@ -95,12 +90,9 @@
     }
   </div>
 
-  <!-- Citation Sidebar -->
   @if (isSidebarOpen) {
     <div class="citation-sidebar">
-      <!-- List View -->
       @if (sidebarView === 'list') {
-        <!-- Sidebar Header - List View -->
         <div class="sidebar-header">
           <div class="sidebar-title">
             <nb-icon icon="list-outline"></nb-icon>
@@ -111,7 +103,6 @@
           </button>
         </div>
 
-        <!-- Citation List -->
         <div class="sidebar-content">
           <div class="citation-buttons-list">
             @for (citation of availableCitations; track citation.id) {
@@ -125,9 +116,7 @@
         </div>
       }
 
-      <!-- Document View -->
       @if (sidebarView === 'document') {
-        <!-- Sidebar Header - Document View -->
         <div class="sidebar-header">
           <button nbButton ghost size="tiny" (click)="backToList()" title="Back to list">
             <nb-icon icon="arrow-back-outline"></nb-icon>
@@ -141,20 +130,13 @@
           </button>
         </div>
 
-        <!-- Sidebar Content -->
         <div class="sidebar-content">
           @if (selectedCitation?.isLoading) {
-            <div class="sidebar-loading">
-              <nb-spinner status="primary" size="large"></nb-spinner>
-              <span>Loading document...</span>
-            </div>
-          } @else if (selectedCitation?.error) {
             <div class="sidebar-error">
               <nb-icon icon="alert-circle-outline"></nb-icon>
               <span>{{ selectedCitation!.error }}</span>
             </div>
           } @else if (selectedCitation?.blobUrl) {
-            <!-- Document Info -->
             <div class="document-info">
               @if (selectedCitation!.citation.citation_location.length) {
                 <div class="page-info">
@@ -167,7 +149,6 @@
               }
             </div>
 
-            <!-- Document Viewer -->
             <div class="viewer-container">
               @if (isPdf()) {
                 <amital-pdf-viewer
