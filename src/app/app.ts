@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NbLayoutModule } from '@nebular/theme';
 import { AmitalAiChatComponent } from './components/amital-ai-chat/amital-ai-chat.component';
 import { AmitalChatConfig } from './types/ai-chat/ai-chat.types';
+import { environment } from '../environments/environment.development';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { AmitalChatConfig } from './types/ai-chat/ai-chat.types';
 export class App {
   chatConfig: AmitalChatConfig = {
     apiConfig: {
-      baseUrl: 'http://localhost:8000', // Change this to your API URL
+      baseUrl: environment.apiBaseUrl,
       useRagByDefault: false,
     },
     placeholder: 'Type a message...',
