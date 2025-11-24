@@ -32,18 +32,18 @@
         </div>
       </ng-template>
 
-      <ng-template nbCustomMessage="formatted-text" let-data let-isReply="isReply">
-        <div
-          class="message-content"
-          [innerHTML]="parseMessageWithCitations(data)"
-          [ngClass]="hasHebrew(data) ? 'rtl-text' : 'ltr-text'"
-        ></div>
+      <ng-template nbCustomMessage="message-with-citations" let-data>
+        <message-with-citations
+          [content]="data.content"
+          [citations]="data.citations"
+          (citationClick)="onCitationClick($event)"
+        ></message-with-citations>
       </ng-template>
 
       @for (message of messages; track trackByMessageId($index, message)) {
         <nb-chat-message
-          [type]="'formatted-text'"
-          [customMessageData]="message.content"
+          [type]="'message-with-citations'"
+          [customMessageData]="{ content: message.content, citations: message.citations }"
           [reply]="message.role === 'user'"
           [sender]="message.role === 'user' ? 'You' : 'AI Assistant'"
           [date]="message.timestamp"

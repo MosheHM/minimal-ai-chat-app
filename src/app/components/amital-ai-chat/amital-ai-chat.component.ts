@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, input, output, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NbChatModule, NbIconModule, NbButtonModule, NbSpinnerModule } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,6 +16,7 @@ import { AmitalPdfViewerComponent } from '../amital-pdf-viewer/amital-pdf-viewer
 import { AmitalWordViewerComponent } from '../amital-word-viewer/amital-word-viewer.component';
 import { AmitalExcelViewerComponent } from '../amital-excel-viewer/amital-excel-viewer.component';
 import { AmitalImageViewerComponent } from '../amital-image-viewer/amital-image-viewer.component';
+import { MessageWithCitationsComponent } from './message-with-citations.component';
 
 /**
  * Amital AI Chat Component
@@ -36,7 +36,8 @@ import { AmitalImageViewerComponent } from '../amital-image-viewer/amital-image-
     AmitalPdfViewerComponent,
     AmitalWordViewerComponent,
     AmitalExcelViewerComponent,
-    AmitalImageViewerComponent
+    AmitalImageViewerComponent,
+    MessageWithCitationsComponent
   ],
   templateUrl: './amital-ai-chat.component.html',
   styleUrls: ['./amital-ai-chat.component.scss'],
@@ -81,8 +82,7 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
   private errorTimeout?: any;
 
   constructor(
-    private chatService: AiChatService,
-    private sanitizer: DomSanitizer
+    private chatService: AiChatService
   ) { }
 
   ngOnInit(): void {
@@ -137,14 +137,11 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     // Set loading state
     this.isLoading = true;
 
-    const useRag = false;
-    // const useRag = this.config().enableRag ?? this.config().apiConfig.useRagByDefault ?? true;
-
     // Prepare request
     const request: { message: string; conversation_history?: ChatMessage[]; use_rag?: boolean } = {
       message: messageContent,
       conversation_history: this.messages.slice(0, -1), // Exclude the message just added
-      use_rag: useRag,
+      use_rag: false,
     };
 
     // Check if streaming is enabled
@@ -466,129 +463,7 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     // We don't clear availableCitations anymore as they are global
   }
 
-  /**
-   * Check if text contains Hebrew characters
-   */
-  public hasHebrew(text: string): boolean {
-    const hebrewRegex = /[\u0590-\u05FF]/;
-    return hebrewRegex.test(text);
-  }
 
-  /**
-   * Parse message content to make citation references clickable
-   * Converts [1], [2], etc. to clickable links
-   * Supports bold text with **text** syntax
-   */
-  parseMessageWithCitations(content: string, citations?: Citation[]): SafeHtml {
-    let parsed = content;
-
-    // Replace citations [1], [2], etc. with clickable links
-    if (citations && citations.length > 0) {
-      const citationMap = new Map<string, Citation>();
-      citations.forEach((c) => citationMap.set(c.citation_id, c));
-
-      parsed = parsed.replace(/\[(\d+)\]/g, (match, num) => {
-        const citation = citationMap.get(num);
-        if (citation) {
-          return `<a href="javascript:void(0)" class="citation-link" data-citation-id="${num}" title="${this.escapeHtml(citation.title)}">[${num}]</a>`;
-        }
-        return match;
-      });
-    }
-
-    return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(parsed, true));
-  }
-
-  /**
-   * Escape HTML special characters and apply markdown formatting
-   */
-  private escapeHtml(text: string, preserveLinks = false): string {
-    if (preserveLinks) {
-      // First escape everything except our citation links
-      const linkPlaceholder = '___CITATION_LINK___';
-      const boldPlaceholder = '___BOLD_TEXT___';
-      const links: string[] = [];
-      const boldTexts: string[] = [];
-
-      // Extract links
-      let result = text.replace(/<a[^>]*class="citation-link"[^>]*>\[(\d+)\]<\/a>/g, (match) => {
-        links.push(match);
-        return linkPlaceholder;
-      });
-
-      // Extract bold text with **text** syntax
-      result = result.replace(/\*\*(.+?)\*\*/g, (match, content) => {
-        boldTexts.push(`<strong>${content}</strong>`);
-        return boldPlaceholder;
-      });
-
-      // Escape the rest
-      result = result
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-        .replace(/\n/g, '<br>');
-
-      // Restore bold texts
-      boldTexts.forEach((bold) => {
-        result = result.replace(boldPlaceholder, bold);
-      });
-
-      // Restore links
-      links.forEach((link) => {
-        result = result.replace(linkPlaceholder, link);
-      });
-
-      return result;
-    }
-
-    // For non-preserve mode, still support bold and line breaks
-    let result = text;
-
-    // Extract bold text before escaping
-    const boldPlaceholder = '___BOLD_TEXT___';
-    const boldTexts: string[] = [];
-
-    result = result.replace(/\*\*(.+?)\*\*/g, (match, content) => {
-      boldTexts.push(content);
-      return boldPlaceholder;
-    });
-
-    // Escape HTML
-    result = result
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;')
-      .replace(/\n/g, '<br>');
-
-    // Restore bold with proper tags
-    boldTexts.forEach((content) => {
-      result = result.replace(boldPlaceholder, `<strong>${content}</strong>`);
-    });
-
-    return result;
-  }
-
-  /**
-   * Handle click on citation link in message
-   */
-  handleCitationLinkClick(event: Event, message: ChatMessage): void {
-    const target = event.target as HTMLElement;
-    if (target.classList.contains('citation-link')) {
-      event.preventDefault();
-      const citationId = target.getAttribute('data-citation-id');
-      if (citationId && message.citations) {
-        const citation = message.citations.find((c) => c.citation_id === citationId);
-        if (citation) {
-          this.onCitationClick(citation);
-        }
-      }
-    }
-  }
 
   /**
    * Get the starting page for the viewer from citation locations
