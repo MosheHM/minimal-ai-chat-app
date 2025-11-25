@@ -1,0 +1,6 @@
+<div 
+  class="message-with-citations" 
+  [ngClass]="hasHebrew(content) ? 'rtl-text' : 'ltr-text'"
+  [innerHTML]="formattedContent"
+  (click)="handleClick($event)"
+></div>

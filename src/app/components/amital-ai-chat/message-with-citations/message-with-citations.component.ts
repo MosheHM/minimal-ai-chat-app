@@ -1,64 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NbButtonModule, NbIconModule } from '@nebular/theme';
-import { Citation } from '../../types/ai-chat/ai-chat.types';
+import { Citation } from '../../../types/ai-chat/ai-chat.types';
 
 @Component({
   selector: 'message-with-citations',
   standalone: true,
   imports: [CommonModule, NbButtonModule, NbIconModule],
-  template: `
-    <div 
-      class="message-with-citations" 
-      [ngClass]="hasHebrew(content) ? 'rtl-text' : 'ltr-text'"
-      [innerHTML]="formattedContent"
-      (click)="handleClick($event)"
-    ></div>
-  `,
-  styles: [`
-    .message-with-citations {
-      word-wrap: break-word;
-      white-space: pre-wrap;
-    }
-
-    .rtl-text {
-      direction: rtl;
-      text-align: right;
-    }
-
-    .ltr-text {
-      direction: ltr;
-      text-align: left;
-    }
-
-    :host ::ng-deep .citation-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      padding: 1px 6px;
-      margin: 0 2px;
-      font-size: 0.85em;
-      font-weight: 600;
-      color: #0095ff;
-      background-color: #e3f2fd;
-      border: 1px solid #90caf9;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      vertical-align: baseline;
-    }
-
-    :host ::ng-deep .citation-btn:hover {
-      background-color: #bbdefb;
-      border-color: #64b5f6;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
-
-    :host ::ng-deep .citation-btn:active {
-      transform: translateY(0);
-    }
-  `]
+  templateUrl: './message-with-citations.component.html',
+  styleUrls: ['./message-with-citations.component.scss']
 })
 export class MessageWithCitationsComponent {
   @Input() content: string = '';

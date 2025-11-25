@@ -132,6 +132,10 @@
 
         <div class="sidebar-content">
           @if (selectedCitation?.isLoading) {
+            <div class="sidebar-loading">
+              <nb-spinner size="large" status="primary"></nb-spinner>
+            </div>
+          } @else if (selectedCitation?.error) {
             <div class="sidebar-error">
               <nb-icon icon="alert-circle-outline"></nb-icon>
               <span>{{ selectedCitation!.error }}</span>
