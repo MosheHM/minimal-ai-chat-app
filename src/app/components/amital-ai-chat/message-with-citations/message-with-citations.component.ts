@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, Output, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NbButtonModule, NbIconModule } from '@nebular/theme';
@@ -16,7 +16,8 @@ export class MessageWithCitationsComponent {
   @Input() citations?: Citation[];
   @Output() citationClick = new EventEmitter<Citation>();
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) {
+  }
 
   get formattedContent(): SafeHtml {
     let formatted = this.content;
@@ -62,7 +63,6 @@ export class MessageWithCitationsComponent {
     const target = event.target as HTMLElement;
 
     const citationBtn = target.closest('.citation-btn') as HTMLElement;
-
     if (citationBtn) {
       event.preventDefault();
       event.stopPropagation();
@@ -76,6 +76,7 @@ export class MessageWithCitationsComponent {
           c.citation_id === (Number(citationId) as unknown) ||
           String(c.citation_id) === citationId
         );
+
 
         if (citation) {
           this.citationClick.emit(citation);
