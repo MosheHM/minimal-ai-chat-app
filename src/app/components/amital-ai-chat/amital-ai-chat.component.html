@@ -105,9 +105,9 @@
 
         <div class="sidebar-content">
           <div class="citation-buttons-list">
-            @for (citation of availableCitations; track citation.id) {
+            @for (citation of availableCitations; track citation.displayId) {
               <button class="citation-button" (click)="selectCitationFromList(citation)">
-                <span class="citation-number">[{{ citation.citation_id }}]</span>
+                <span class="citation-number">[{{ citation.displayId }}]</span>
                 <span class="citation-name">{{ citation.title }}</span>
                 <nb-icon icon="arrow-ios-forward-outline" class="citation-arrow"></nb-icon>
               </button>
@@ -132,6 +132,10 @@
 
         <div class="sidebar-content">
           @if (selectedCitation?.isLoading) {
+            <div class="sidebar-loading">
+              <nb-spinner size="large" status="primary"></nb-spinner>
+            </div>
+          } @else if (selectedCitation?.error) {
             <div class="sidebar-error">
               <nb-icon icon="alert-circle-outline"></nb-icon>
               <span>{{ selectedCitation!.error }}</span>

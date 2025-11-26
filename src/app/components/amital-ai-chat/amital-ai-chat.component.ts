@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, input, output, HostBinding } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output, HostBinding, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbChatModule, NbIconModule, NbButtonModule, NbSpinnerModule } from '@nebular/theme';
@@ -8,6 +8,7 @@ import {
   AmitalChatConfig,
   ChatMessage,
   ChatConversation,
+  ChatRequest,
   Citation,
   SelectedCitation,
 } from '../../types/ai-chat/ai-chat.types';
@@ -18,10 +19,7 @@ import { AmitalExcelViewerComponent } from '../amital-excel-viewer/amital-excel-
 import { AmitalImageViewerComponent } from '../amital-image-viewer/amital-image-viewer.component';
 import { MessageWithCitationsComponent } from './message-with-citations.component';
 
-/**
- * Amital AI Chat Component
- * A standalone chat interface component for AI conversations
- */
+
 @Component({
   selector: 'amital-ai-chat',
   standalone: true,
@@ -43,12 +41,10 @@ import { MessageWithCitationsComponent } from './message-with-citations.componen
   styleUrls: ['./amital-ai-chat.component.scss'],
 })
 export class AmitalAiChatComponent implements OnInit, OnDestroy {
-  // Inputs
   config = input.required<AmitalChatConfig>();
   height = input<string>('600px');
   width = input<string>('100%');
 
-  // Host bindings for dimensions
   @HostBinding('style.height') get hostHeight(): string {
     return this.height();
 
@@ -58,13 +54,11 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
   }
   @HostBinding('style.display') hostDisplay = 'block';
 
-  // Outputs
   messageSent = output<ChatMessage>();
   messageReceived = output<ChatMessage>();
   error = output<Error>();
   citationClicked = output<Citation>();
 
-  // Component state
   currentMessage = '';
   messages: ChatMessage[] = [];
   isLoading = false;
@@ -72,24 +66,22 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
   currentConversation?: ChatConversation;
   currentDate = new Date();
 
-  // Citation sidebar state
   selectedCitation?: SelectedCitation;
   isSidebarOpen = false;
   sidebarView: 'list' | 'document' = 'list';
-  availableCitations: Citation[] = [];
+  availableCitations: (Citation & { messageIndex: number; displayId: string })[] = [];
 
   private destroy$ = new Subject<void>();
   private errorTimeout?: any;
 
   constructor(
-    private chatService: AiChatService
+    private chatService: AiChatService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    // Initialize the chat service with API config
     this.chatService.setBaseUrl(this.config().apiConfig.baseUrl);
 
-    // Initialize conversation
     this.currentConversation = {
       id: this.generateId(),
       title: 'AI Chat',
@@ -105,15 +97,11 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     if (this.errorTimeout) {
       clearTimeout(this.errorTimeout);
     }
-    // Cleanup blob URL
     if (this.selectedCitation?.blobUrl) {
       URL.revokeObjectURL(this.selectedCitation.blobUrl);
     }
   }
 
-  /**
-   * Send a message
-   */
   sendMessage(): void {
     if (!this.currentMessage.trim() || this.isLoading) {
       return;
@@ -122,7 +110,6 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     const messageContent = this.currentMessage.trim();
     this.currentMessage = '';
 
-    // Create user message
     const userMessage: ChatMessage = {
       id: this.generateId(),
       content: messageContent,
@@ -130,21 +117,17 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
       timestamp: new Date(),
     };
 
-    // Add user message to conversation
-    this.addMessage(userMessage);
-    this.messageSent.emit(userMessage);
-
-    // Set loading state
-    this.isLoading = true;
-
-    // Prepare request
-    const request: { message: string; conversation_history?: ChatMessage[]; use_rag?: boolean } = {
+    const request: ChatRequest = {
       message: messageContent,
-      conversation_history: this.messages.slice(0, -1), // Exclude the message just added
+      conversation_history: this.messages,
       use_rag: false,
     };
 
-    // Check if streaming is enabled
+    this.addMessage(userMessage);
+    this.messageSent.emit(userMessage);
+
+    this.isLoading = true;
+
     if (this.config().enableStreaming) {
       this.sendStreamingMessage(request);
     } else {
@@ -152,22 +135,13 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Send standard (non-streaming) message
-   */
-  private sendStandardMessage(request: {
-    message: string;
-    conversation_history?: ChatMessage[];
-    use_rag?: boolean;
-  }): void {
+
+  private sendStandardMessage(request: ChatRequest): void {
     this.chatService
       .chat(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('Chat response received:', response);
-          console.log('Citations in response:', response.citations);
-
           const aiMessage: ChatMessage = {
             id: this.generateId(),
             content: response.message,
@@ -188,15 +162,9 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Send streaming message
-   */
-  private sendStreamingMessage(request: {
-    message: string;
-    conversation_history?: ChatMessage[];
-    use_rag?: boolean;
-  }): void {
-    // Create placeholder AI message
+
+  private sendStreamingMessage(request: ChatRequest): void {
+
     const aiMessage: ChatMessage = {
       id: this.generateId(),
       content: '',
@@ -240,9 +208,7 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Handle message sent from Nebular chat form
-   */
+
   onSendMessage(event: any): void {
     if (event.message && event.message.trim()) {
       this.currentMessage = event.message.trim();
@@ -250,9 +216,6 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Clear the current conversation
-   */
   clearConversation(): void {
     this.currentConversation = {
       id: this.generateId(),
@@ -266,9 +229,7 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     this.updateAvailableCitations();
   }
 
-  /**
-   * Add message to conversation
-   */
+
   private addMessage(message: ChatMessage): void {
     if (this.currentConversation) {
       this.currentConversation.messages.push(message);
@@ -278,9 +239,6 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Update message in conversation
-   */
   private updateMessage(message: ChatMessage): void {
     if (this.currentConversation) {
       const index = this.currentConversation.messages.findIndex((m) => m.id === message.id);
@@ -292,29 +250,34 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Update the list of available citations from all messages
-   */
-  private updateAvailableCitations(): void {
-    const allCitations = new Map<string, Citation>();
 
+  private updateAvailableCitations(): void {
+    const allCitations = new Map<string, Citation & { messageIndex: number; displayId: string }>();
+
+    // Count only assistant messages for proper message numbering
+    let assistantMessageIndex = 0;
     this.messages.forEach((message) => {
-      if (message.citations) {
-        message.citations.forEach((citation) => {
-          // Use id (source doc id) for deduplication
-          if (!allCitations.has(citation.id)) {
-            allCitations.set(citation.id, citation);
-          }
-        });
+      if (message.role === 'assistant') {
+        assistantMessageIndex++;
+        if (message.citations) {
+          message.citations.forEach((citation) => {
+            const uniqueKey = `${assistantMessageIndex}.${citation.citation_id}`;
+            if (!allCitations.has(uniqueKey)) {
+              allCitations.set(uniqueKey, {
+                ...citation,
+                messageIndex: assistantMessageIndex,
+                displayId: `${assistantMessageIndex}.${citation.citation_id}`
+              });
+            }
+          });
+        }
       }
     });
 
     this.availableCitations = Array.from(allCitations.values());
   }
 
-  /**
-   * Toggle the citation sidebar
-   */
+ 
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;
     if (this.isSidebarOpen) {
@@ -323,23 +286,16 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Generate unique ID
-   */
+
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   }
 
-  /**
-   * Track by function for messages
-   */
+
   trackByMessageId(index: number, message: ChatMessage): string {
     return message.id;
   }
 
-  /**
-   * Get CSS class for message
-   */
   getMessageClass(message: ChatMessage): string {
     const classes = ['message', `message-${message.role}`];
 
@@ -363,59 +319,48 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
    * Set error message with auto-clear after 5 seconds
    */
   private setErrorMessage(message: string): void {
-    // Clear any existing timeout
     if (this.errorTimeout) {
       clearTimeout(this.errorTimeout);
     }
 
     this.errorMessage = message;
 
-    // Auto-clear after 5 seconds
     this.errorTimeout = setTimeout(() => {
       this.errorMessage = undefined;
       this.errorTimeout = undefined;
     }, 5000);
   }
 
-  /**
-   * Handle citation click - opens sidebar with citation list
-   */
-  onCitationClick(citation: Citation): void {
-    console.log('onCitationClick called', { citation });
 
+  onCitationClick(citation: Citation): void {
     this.citationClicked.emit(citation);
 
-    // Open sidebar
     this.isSidebarOpen = true;
 
-    // Select the citation and show document
-    this.selectCitationFromList(citation);
+    // Use setTimeout to ensure sidebar DOM is created before selecting citation
+    setTimeout(() => {
+      this.selectCitationFromList(citation);
+    }, 0);
   }
 
-  /**
-   * Select a citation from the list and load the document
-   */
+
   selectCitationFromList(citation: Citation): void {
     this.citationClicked.emit(citation);
 
-    // Set loading state
     this.selectedCitation = {
       citation,
-      isLoading: true,
+      isLoading: true
     };
     this.sidebarView = 'document';
 
-    // Get the filename from metadata
     const filename = citation.metadata?.filename || citation.title;
 
-    // Download the blob content
     this.chatService
       .downloadBlob(filename)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
           if (this.selectedCitation) {
-            // Create a blob URL from the downloaded content
             const blobUrl = URL.createObjectURL(blob);
             this.selectedCitation = {
               ...this.selectedCitation,
@@ -437,11 +382,8 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Go back to citation list from document view
-   */
+
   backToList(): void {
-    // Cleanup blob URL
     if (this.selectedCitation?.blobUrl) {
       URL.revokeObjectURL(this.selectedCitation.blobUrl);
     }
@@ -449,25 +391,17 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     this.selectedCitation = undefined;
   }
 
-  /**
-   * Close the citation sidebar completely
-   */
+ 
   closeSidebar(): void {
-    // Cleanup blob URL
     if (this.selectedCitation?.blobUrl) {
       URL.revokeObjectURL(this.selectedCitation.blobUrl);
     }
     this.isSidebarOpen = false;
     this.sidebarView = 'list';
     this.selectedCitation = undefined;
-    // We don't clear availableCitations anymore as they are global
   }
 
 
-
-  /**
-   * Get the starting page for the viewer from citation locations
-   */
   getViewerStartPage(): number {
     if (this.selectedCitation?.citation.citation_location?.length) {
       const firstPage = parseInt(this.selectedCitation.citation.citation_location[0], 10);
@@ -476,47 +410,35 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
     return 1;
   }
 
-  /**
-   * Get file type for viewer selection
-   */
+
   getFileType(): string {
     return this.selectedCitation?.citation.file_type?.toLowerCase() || '';
   }
 
-  /**
-   * Check if file is a PDF
-   */
+
   isPdf(): boolean {
     return this.getFileType() === 'pdf';
   }
 
-  /**
-   * Check if file is a Word document
-   */
+
   isWord(): boolean {
     const type = this.getFileType();
     return type === 'docx' || type === 'doc';
   }
 
-  /**
-   * Check if file is an Excel document
-   */
+
   isExcel(): boolean {
     const type = this.getFileType();
     return type === 'xlsx' || type === 'xls';
   }
 
-  /**
-   * Check if file is an image
-   */
+
   isImage(): boolean {
     const type = this.getFileType();
     return ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(type);
   }
 
-  /**
-   * Handle viewer load error
-   */
+
   onViewerError(error: string): void {
     if (this.selectedCitation) {
       this.selectedCitation = {

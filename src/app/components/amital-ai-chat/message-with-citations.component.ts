@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NbButtonModule, NbIconModule } from '@nebular/theme';
 import { Citation } from '../../types/ai-chat/ai-chat.types';
 
@@ -8,11 +9,10 @@ import { Citation } from '../../types/ai-chat/ai-chat.types';
   standalone: true,
   imports: [CommonModule, NbButtonModule, NbIconModule],
   template: `
-    <div 
-      class="message-with-citations" 
+    <div
+      class="message-with-citations"
       [ngClass]="hasHebrew(content) ? 'rtl-text' : 'ltr-text'"
       [innerHTML]="formattedContent"
-      (click)="handleClick($event)"
     ></div>
   `,
   styles: [`
@@ -44,8 +44,11 @@ import { Citation } from '../../types/ai-chat/ai-chat.types';
       border: 1px solid #90caf9;
       border-radius: 4px;
       cursor: pointer;
+      pointer-events: auto;
       transition: all 0.2s ease;
       vertical-align: baseline;
+      position: relative;
+      z-index: 1;
     }
 
     :host ::ng-deep .citation-btn:hover {
@@ -65,31 +68,34 @@ export class MessageWithCitationsComponent {
   @Input() citations?: Citation[];
   @Output() citationClick = new EventEmitter<Citation>();
 
-  get formattedContent(): string {
+  constructor(private sanitizer: DomSanitizer) {}
+
+  get formattedContent(): SafeHtml {
     let formatted = this.content;
-    
-    // Apply bold formatting with **text** syntax
+
     formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    
-    // Convert line breaks to <br>
+
     formatted = formatted.replace(/\n/g, '<br>');
-    
-    // Replace inline citation references [1], [2] with clickable buttons
-    // Only for citations that are actually in the message
+
+
     if (this.citations && this.citations.length > 0) {
-      const citationMap = new Map<string, Citation>();
-      this.citations.forEach(c => citationMap.set(c.citation_id, c));
-      
+      const citationMap = new Map<string | number, Citation>();
+      this.citations.forEach(c => {
+        citationMap.set(c.citation_id, c);
+        citationMap.set(String(c.citation_id), c);
+      });
+
       formatted = formatted.replace(/\[(\d+)\]/g, (match, num) => {
-        const citation = citationMap.get(num);
+
+        let citation = citationMap.get(num) || citationMap.get(Number(num));
         if (citation) {
           return `<span class="citation-btn" data-citation-id="${num}" title="${this.escapeHtml(citation.title)}">[${num}]</span>`;
         }
         return match;
       });
     }
-    
-    return formatted;
+
+    return this.sanitizer.bypassSecurityTrustHtml(formatted);
   }
 
   hasHebrew(text: string): boolean {
@@ -103,14 +109,30 @@ export class MessageWithCitationsComponent {
     return div.innerHTML;
   }
 
-  handleClick(event: Event): void {
+  @HostListener('click', ['$event'])
+  handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    if (target.classList.contains('citation-btn')) {
-      const citationId = target.getAttribute('data-citation-id');
+
+    const citationBtn = target.closest('.citation-btn') as HTMLElement;
+
+    if (citationBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const citationId = citationBtn.getAttribute('data-citation-id');
+
       if (citationId && this.citations) {
-        const citation = this.citations.find(c => c.citation_id === citationId);
+
+        const citation = this.citations.find(c =>
+          c.citation_id === citationId ||
+          c.citation_id === (Number(citationId) as unknown) ||
+          String(c.citation_id) === citationId
+        );
+
         if (citation) {
           this.citationClick.emit(citation);
+        } else {
+          console.warn('Citation not found for ID:', citationId);
         }
       }
     }
