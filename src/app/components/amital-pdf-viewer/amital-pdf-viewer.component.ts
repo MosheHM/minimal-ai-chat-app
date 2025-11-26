@@ -70,7 +70,6 @@ export class AmitalPdfViewerComponent implements OnInit, OnDestroy {
   }
 
   onPdfLoaded(event: any): void {
-    console.log('PDF loaded successfully', event);
     if (event && event.pagesCount) {
       this.totalPages = event.pagesCount;
     }
