@@ -17,7 +17,7 @@ import { AmitalPdfViewerComponent } from '../amital-pdf-viewer/amital-pdf-viewer
 import { AmitalWordViewerComponent } from '../amital-word-viewer/amital-word-viewer.component';
 import { AmitalExcelViewerComponent } from '../amital-excel-viewer/amital-excel-viewer.component';
 import { AmitalImageViewerComponent } from '../amital-image-viewer/amital-image-viewer.component';
-import { MessageWithCitationsComponent } from './message-with-citations.component';
+import { MessageWithCitationsComponent } from './message-with-citations/message-with-citations.component';
 
 
 @Component({
