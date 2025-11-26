@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, input, output, HostBinding, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NbChatModule, NbIconModule, NbButtonModule, NbSpinnerModule } from '@nebular/theme';
@@ -76,7 +76,6 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private chatService: AiChatService,
-    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -253,8 +252,6 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
 
   private updateAvailableCitations(): void {
     const allCitations = new Map<string, Citation & { messageIndex: number; displayId: string }>();
-
-    // Count only assistant messages for proper message numbering
     let assistantMessageIndex = 0;
     this.messages.forEach((message) => {
       if (message.role === 'assistant') {
@@ -334,13 +331,9 @@ export class AmitalAiChatComponent implements OnInit, OnDestroy {
 
   onCitationClick(citation: Citation): void {
     this.citationClicked.emit(citation);
-
     this.isSidebarOpen = true;
 
-    // Use setTimeout to ensure sidebar DOM is created before selecting citation
-    setTimeout(() => {
-      this.selectCitationFromList(citation);
-    }, 0);
+    this.selectCitationFromList(citation);
   }
 
 
